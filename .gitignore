@@ -1,0 +1,20 @@
+# Google Cloud credentials
+backend/serviceAccountKey.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
