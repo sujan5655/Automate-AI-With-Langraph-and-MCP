@@ -8,6 +8,10 @@ export const createAgent = async (req, res) => {
     if (!name || !knowledgeBase || !instructions || !tools) {
       return res.status(400).json({ message: "send all detail" });
     }
+    const existingAgentName = await Agent.findOne({ name });
+    if (existingAgentName) {
+      return res.status(400).json({ message: "agent's name should be unique" });
+    }
     const userId = req.user._id;
     console.log(userId);
     const agent = await Agent.create({

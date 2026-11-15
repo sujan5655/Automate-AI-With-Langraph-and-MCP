@@ -1,14 +1,19 @@
 import { api } from "../../api";
 
 export const createAgent = async (name, knowledgeBase, instructions, tools) => {
-  const { data } = await api.post(
-    "/api/agent/",
-    name,
-    knowledgeBase,
-    instructions,
-    tools,
-  );
-  return data;
+  try {
+    const { data } = await api.post(
+      "/api/agent/",
+      name,
+      knowledgeBase,
+      instructions,
+      tools,
+    );
+    return data;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };
 
 export const getAllAgents = async (token) => {

@@ -8,6 +8,8 @@ import HomePage from "./pages/Home";
 import Agents from "./pages/Agents";
 import Integration from "./pages/Integration";
 import CreateAgent from "./pages/CreateAgent";
+import { setAgents, setAgentsLoading } from "./redux/agentSlice";
+import { getAllAgents } from "./features/agent";
 
 function App() {
   const dispatch = useDispatch();
@@ -16,13 +18,29 @@ function App() {
     const fetch = async () => {
       try {
         const data = await me();
-        console.log(data);
-        dispatch(setUserData(data));
+        if (data) {
+          dispatch(setUserData(data));
+        }
       } catch (error) {
         console.log(error);
       }
     };
     fetch();
+  }, []);
+  const fetchAgents = async () => {
+    dispatch(setAgentsLoading(true));
+    try {
+      const data = await getAllAgents();
+      dispatch(setAgents(data ?? []));
+      dispatch(setAgentsLoading(false));
+      console.log(data);
+    } catch (error) {
+      dispatch(setAgentsLoading(false));
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchAgents();
   }, []);
 
   const { userData } = useSelector((state) => state.user);

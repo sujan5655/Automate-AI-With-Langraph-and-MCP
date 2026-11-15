@@ -53,20 +53,25 @@ function CreateAgent() {
       console.log("instructions", instructions);
       console.log("knowledge base", knowledgeBase);
       console.log("tools", tools);
-      const data = await createAgent({
+      const result = await createAgent({
         name,
         instructions,
         knowledgeBase,
         tools,
       });
+      if (result?.response?.data?.message) {
+        console.log(result);
+        setError(result?.response?.data?.message);
+        setLoading(false);
+        return;
+      }
 
       console.log("Agent Data:", data);
       setLoading(false);
       navigate("/agents");
     } catch (error) {
-      setError(error.response?.data?.message || "Unable to create agent");
-      setLoading(false);
       console.log(error);
+      setLoading(false);
     }
   };
 
@@ -246,7 +251,6 @@ function CreateAgent() {
                 </Button>
 
                 <Button
-                  onClick={handleSubmit}
                   type="submit"
                   className="h-10 rounded-xl bg-white px-5 text-xs font-medium text-zinc-900 hover:bg-zinc-200"
                 >

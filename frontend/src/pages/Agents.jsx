@@ -1,29 +1,50 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getAllAgents } from "@/features/agent";
+import { deleteAgent, getAllAgents } from "@/features/agent";
 
 import { ArrowLeft, Bot, Plus, Search, Trash, Workflow } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setAgents,
+  setAgentsLoading,
+  setDelete,
+  setSelectedAgent,
+} from "@/redux/agentSlice";
+
 const darkPanel =
   "border border-white/10 bg-white/[0.04] shadow-[0_20px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl";
 
 const whiteBtn =
   "rounded-xl border-0 bg-white text-zinc-900 hover:bg-zinc-200 hover:text-zinc-900";
+
 function Agents() {
-  const [agents, setAgents] = useState([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const { agents, agentsLoading: loading } = useSelector(
+    (state) => state.agent,
+  );
+
+  const filteredAgents = (agents ?? []).filter((agent) => {
+    const query = search.toLowerCase();
+    return (
+      agent?.name.toLowerCase()?.includes(query) ||
+      agent?.instructions?.toLowerCase()?.includes(query) ||
+      agent?.knowledgeBase?.toLowerCase()?.includes(query)
+    );
+  });
   const fetchAgents = async () => {
-    setLoading(true);
+    dispatch(setAgentsLoading(true));
     try {
       const data = await getAllAgents();
-      setAgents(data);
-      setLoading(false);
+      dispatch(setAgents(data));
+      dispatch(setAgentsLoading(false));
       console.log(data);
     } catch (error) {
-      setLoading(false);
+      dispatch(setAgentsLoading(false));
       console.log(error);
     }
   };
@@ -31,14 +52,14 @@ function Agents() {
     fetchAgents();
   }, []);
 
-  const filteredAgents = agents.filter((agent) => {
-    const query = search.toLowerCase();
-    return (
-      agent?.name.toLowerCase()?.toLowerCase()?.includes(query) ||
-      agent?.instructions?.toLowerCase()?.includes(query) ||
-      agent?.knowledgeBase?.toLowerCase()?.includes(query)
-    );
-  });
+  const handleDelete = async (id) => {
+    try {
+      await deleteAgent(id);
+      dispatch(setDelete(id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,#2b2f3a_0%,#191b21_55%,#121317_100%)] text-white">
@@ -122,22 +143,55 @@ function Agents() {
                 return (
                   <div
                     key={agentId}
-                    className={`group flex min-h-56 flex-col rounded-2xl p-5 transition hover:border-white25 hover:bg-white ${darkPanel}`}
+                    className={`group flex min-h-56 flex-col rounded-2xl p-5 transition hover:border-white25  ${darkPanel}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <Bot />
                       </div>
-                      <button>
+                      <button
+                        onClick={() => handleDelete(agent?._id)}
+                        className="rounded-lg p-2 text-zinc-500 transition hover:bg-red-500 hover:text-red-400 disabled:opacity-50"
+                      >
                         <Trash />
                       </button>
+                    </div>
+                    <h2 className="mt-5 truncate text-base font-medium text-white">
+                      {agent?.name || "Untitled Agent"}
+                    </h2>
+                    <p className="mt-2 line-clamp-3 flex-1 text-sm leading-6 text-zinc-500">
+                      {agent?.instructions || "No instructions provided"}
+                    </p>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">My Agents</span>
+                      <Button
+                        onClick={() => dispatch(setSelectedAgent(agent.name))}
+                        className="flex flex-row items-center flex-0.5"
+                      >
+                        <Link to="/">
+                          <span>Use Agent</span>
+                          <ArrowLeft />
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div></div>
+            <div className="mt-6 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-5 text-center">
+              <div className="grid size-12 place-items-center rounded-xl bg-white text-zinc-900">
+                <Bot size={23} />
+              </div>
+              <h2 className="mt-4 text-base font-medium text-white">
+                {search ? "No agents found" : "No agents yet"}
+              </h2>
+              <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-500">
+                {search
+                  ? "Try searching with another name or keyword"
+                  : "Create your first AI agent to get started"}
+              </p>
+            </div>
           )}
         </main>
       </div>

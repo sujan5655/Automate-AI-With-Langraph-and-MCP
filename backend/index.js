@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/authRoute.js";
 import agentRouter from "./routes/agent.route.js";
+import chatRouter from "./routes/chat.routes.js";
 
 dotenv.config();
 
@@ -39,7 +40,7 @@ app.get("/", (req, res) => {
 // Auth routes
 app.use("/api/auth", authRouter);
 app.use("/api/agent", agentRouter);
-
+app.use("/api/chat", chatRouter);
 // Error handler
 app.use((err, req, res, next) => {
   console.error("Express error:", err);
