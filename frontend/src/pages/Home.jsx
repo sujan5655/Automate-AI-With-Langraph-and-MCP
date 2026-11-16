@@ -138,7 +138,7 @@ function Home() {
                     className="flex justify-between gap-4"
                     to={"/agents/new"}
                   >
-                    Create New Agent
+                    Create New Agent Properly
                     <Plus />
                   </Link>
                 </DropdownMenuItem>
